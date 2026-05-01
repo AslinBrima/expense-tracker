@@ -1,7 +1,12 @@
 from django.urls import path
+from django.contrib import admin
+from django.urls import path
+from yourapp import views
 from . import views
 
 urlpatterns = [
+    path('admin/',admin.site.urls),
+    path('',views.home),
     path('', views.dashboard, name='home'),
     path('dashboard/', views.dashboard, name='dashboard'),
     path('signup/', views.signup_view, name='signup'),
