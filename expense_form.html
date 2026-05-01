@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+{% block title %}{{ action }} Expense - SmartTrack{% endblock %}
+{% block page_title %}{{ action }} Expense{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <div class="card">
+      <div class="card-header bg-white border-0 pt-4 ps-4">
+        <h5 class="fw-bold mb-0">
+          {% if action == 'Add' %}<i class="bi bi-plus-circle me-2" style="color:#6C63FF"></i>{% else %}<i class="bi bi-pencil me-2" style="color:#6C63FF"></i>{% endif %}
+          {{ action }} Expense
+        </h5>
+      </div>
+      <div class="card-body p-4">
+        <!-- Smart prediction notice -->
+        <div class="alert alert-info d-flex align-items-center mb-4" role="alert">
+          <i class="bi bi-lightbulb-fill me-2"></i>
+          <small><strong>Smart Category:</strong> Type a description and the category will be predicted automatically!</small>
+        </div>
+
+        <form method="post" id="expenseForm">
+          {% csrf_token %}
+          <div class="row g-3">
+            <div class="col-12">
+              <label class="form-label fw-semibold">Description <span class="text-danger">*</span></label>
+              {{ form.description }}
+              {% if form.description.errors %}<div class="text-danger small">{{ form.description.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Amount (₹) <span class="text-danger">*</span></label>
+              {{ form.amount }}
+              {% if form.amount.errors %}<div class="text-danger small">{{ form.amount.errors }}</div>{% endif %}
+            </div>
+            <div class="col-md-6">
+              <label class="form-label fw-semibold">Date <span class="text-danger">*</span></label>
+              {{ form.date }}
+              {% if form.date.errors %}<div class="text-danger small">{{ form.date.errors }}</div>{% endif %}
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Category</label>
+              <div class="d-flex align-items-center gap-2">
+                {{ form.category }}
+                <span id="predictBadge" class="badge bg-success d-none">Auto-predicted</span>
+              </div>
+            </div>
+            <div class="col-12">
+              <label class="form-label fw-semibold">Notes</label>
+              {{ form.notes }}
+            </div>
+          </div>
+          <div class="d-flex gap-2 mt-4">
+            <button type="submit" class="btn btn-primary px-4">
+              <i class="bi bi-check-lg me-1"></i> {{ action }} Expense
+            </button>
+            <a href="{% url 'expense_list' %}" class="btn btn-outline-secondary px-4">Cancel</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let debounceTimer;
+const descInput = document.getElementById('id_description');
+const categorySelect = document.getElementById('id_category');
+const badge = document.getElementById('predictBadge');
+
+descInput.addEventListener('input', function() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    const desc = this.value.trim();
+    if (desc.length < 3) return;
+    fetch(`/api/predict-category/?description=${encodeURIComponent(desc)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.category) {
+          categorySelect.value = data.category;
+          badge.classList.remove('d-none');
+          setTimeout(() => badge.classList.add('d-none'), 2500);
+        }
+      });
+  }, 500);
+});
+</script>
+{% endblock %}
