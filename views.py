@@ -9,11 +9,13 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Sum
 from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import ExpenseForm, FilterForm, SignupForm
 from .models import Expense, predict_category
-
+def home(request):
+    return HttpResponse("Site working")
 
 # ─── Auth Views ───────────────────────────────────────────────
 
